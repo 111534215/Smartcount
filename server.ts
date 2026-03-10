@@ -81,6 +81,12 @@ async function startServer() {
   const app = express();
   app.use(express.json());
 
+  // 中間件：日誌紀錄
+  app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    next();
+  });
+
   // --- API Routes ---
 
   // 1. 使用者登入
@@ -133,18 +139,30 @@ async function startServer() {
 
   // 3. 建立預約
   app.post("/api/appointments", (req, res) => {
-    const { name, phone, visit_time, leave_time, teacher, reason } = req.body;
+    let { name, phone, visit_time, leave_time, teacher, reason } = req.body;
+    
+    if (!name || !phone || !visit_time) {
+      return res.status(400).json({ detail: "請填寫所有必填欄位 (姓名、電話、入校時間)" });
+    }
+
+    // 正規化電話號碼 (僅保留數字)
+    const normalizedPhone = phone.replace(/\D/g, '');
     
     // 防呆：檢查是否有相同電話的「待簽到」預約
-    const existing = db.prepare("SELECT * FROM appointments WHERE phone = ? AND status = 'pending'").get(phone);
+    const existing = db.prepare("SELECT * FROM appointments WHERE phone = ? AND status = 'pending'").get(normalizedPhone);
     if (existing) {
       return res.status(400).json({ detail: "該電話號碼已有尚未簽到的預約，請先完成入校或聯繫管理員。" });
     }
 
-    const info = db.prepare("INSERT INTO appointments (name, phone, visit_time, leave_time, teacher, reason) VALUES (?, ?, ?, ?, ?, ?)")
-      .run(name, phone, visit_time, leave_time, teacher, reason);
-    const appointment = db.prepare("SELECT * FROM appointments WHERE id = ?").get(info.lastInsertRowid);
-    res.json(appointment);
+    try {
+      const info = db.prepare("INSERT INTO appointments (name, phone, visit_time, leave_time, teacher, reason) VALUES (?, ?, ?, ?, ?, ?)")
+        .run(name, normalizedPhone, visit_time, leave_time, teacher, reason);
+      const appointment = db.prepare("SELECT * FROM appointments WHERE id = ?").get(info.lastInsertRowid);
+      res.json(appointment);
+    } catch (e) {
+      console.error("建立預約失敗:", e);
+      res.status(500).json({ detail: "系統錯誤，無法建立預約" });
+    }
   });
 
   // 4. 取得所有預約
@@ -168,8 +186,9 @@ async function startServer() {
     const { phone } = req.query;
     if (!phone) return res.status(400).json({ detail: "請提供電話號碼" });
     
-    const appointment = db.prepare("SELECT * FROM appointments WHERE phone = ? AND status = 'pending' ORDER BY created_at DESC").get(phone);
-    if (!appointment) return res.status(404).json({ detail: "找不到該電話的有效預約" });
+    const normalizedPhone = (phone as string).replace(/\D/g, '');
+    const appointment = db.prepare("SELECT * FROM appointments WHERE phone = ? AND status = 'pending' ORDER BY created_at DESC").get(normalizedPhone);
+    if (!appointment) return res.status(404).json({ detail: "找不到該電話的有效預約紀錄" });
     res.json(appointment);
   });
 

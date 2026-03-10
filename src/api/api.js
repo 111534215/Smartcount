@@ -18,10 +18,10 @@ api.interceptors.request.use((config) => {
 
 export const appointmentApi = {
   // 建立預約
-  create: (data) => api.post('/appointments/', data),
+  create: (data) => api.post('/appointments', data),
   
   // 取得所有預約
-  getAll: () => api.get('/appointments/'),
+  getAll: () => api.get('/appointments'),
   
   // 取得單一預約
   getById: (id) => api.get(`/appointments/${id}`),
@@ -50,8 +50,8 @@ export const appointmentApi = {
 
 export const userApi = {
   login: (data) => api.post('/users/login', data),
-  create: (data) => api.post('/users/', data),
-  getAll: () => api.get('/users/'),
+  create: (data) => api.post('/users', data),
+  getAll: () => api.get('/users'),
   bulkCreate: (data) => api.post('/users/bulk', data),
   updatePassword: (id, password) => api.post(`/users/${id}/password`, { password }),
 };

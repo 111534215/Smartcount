@@ -42,7 +42,8 @@ const FindMyQRCode = () => {
       message.success('已找到您的預約紀錄');
     } catch (error) {
       console.error('查詢失敗:', error);
-      message.error(error.response?.data?.detail || '找不到該電話的有效預約紀錄');
+      const errorMsg = error.response?.data?.detail || error.response?.data?.message || error.message || '找不到該電話的有效預約紀錄';
+      message.error(errorMsg);
       setAppointment(null);
     } finally {
       setLoading(false);
