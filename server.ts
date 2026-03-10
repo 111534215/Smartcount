@@ -115,14 +115,32 @@ async function startServer() {
 
   // 2.1 取得所有使用者 (僅限管理員)
   app.get("/api/users", (req, res) => {
-    // 這裡簡單處理，實際應檢查 JWT role
     const users = db.prepare("SELECT id, username, role, student_id FROM users").all();
     res.json(users);
+  });
+
+  // 2.2 更新使用者密碼 (僅限管理員)
+  app.post("/api/users/:id/password", (req, res) => {
+    const { password } = req.body;
+    if (!password) return res.status(400).json({ detail: "請提供新密碼" });
+    
+    const hashed_password = bcrypt.hashSync(password, 10);
+    const info = db.prepare("UPDATE users SET hashed_password = ? WHERE id = ?").run(hashed_password, req.params.id);
+    
+    if (info.changes === 0) return res.status(404).json({ detail: "使用者不存在" });
+    res.json({ message: "密碼更新成功" });
   });
 
   // 3. 建立預約
   app.post("/api/appointments", (req, res) => {
     const { name, phone, visit_time, leave_time, teacher, reason } = req.body;
+    
+    // 防呆：檢查是否有相同電話的「待簽到」預約
+    const existing = db.prepare("SELECT * FROM appointments WHERE phone = ? AND status = 'pending'").get(phone);
+    if (existing) {
+      return res.status(400).json({ detail: "該電話號碼已有尚未簽到的預約，請先完成入校或聯繫管理員。" });
+    }
+
     const info = db.prepare("INSERT INTO appointments (name, phone, visit_time, leave_time, teacher, reason) VALUES (?, ?, ?, ?, ?, ?)")
       .run(name, phone, visit_time, leave_time, teacher, reason);
     const appointment = db.prepare("SELECT * FROM appointments WHERE id = ?").get(info.lastInsertRowid);
@@ -143,6 +161,16 @@ async function startServer() {
     const appointments = db.prepare("SELECT * FROM appointments WHERE name LIKE ? OR phone LIKE ? ORDER BY created_at DESC")
       .all(`%${query}%`, `%${query}%`);
     res.json(appointments);
+  });
+
+  // 4.2 透過電話找回 QR Code (僅限待簽到)
+  app.get("/api/appointments/find-by-phone", (req, res) => {
+    const { phone } = req.query;
+    if (!phone) return res.status(400).json({ detail: "請提供電話號碼" });
+    
+    const appointment = db.prepare("SELECT * FROM appointments WHERE phone = ? AND status = 'pending' ORDER BY created_at DESC").get(phone);
+    if (!appointment) return res.status(404).json({ detail: "找不到該電話的有效預約" });
+    res.json(appointment);
   });
 
   // 5. 取得單一預約

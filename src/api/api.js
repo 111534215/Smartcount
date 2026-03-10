@@ -43,6 +43,9 @@ export const appointmentApi = {
   
   // 簽退
   checkout: (id) => api.post(`/appointments/${id}/checkout`),
+  
+  // 透過電話找回預約 (QR Code)
+  findByPhone: (phone) => api.get('/appointments/find-by-phone', { params: { phone } }),
 };
 
 export const userApi = {
@@ -50,6 +53,7 @@ export const userApi = {
   create: (data) => api.post('/users/', data),
   getAll: () => api.get('/users/'),
   bulkCreate: (data) => api.post('/users/bulk', data),
+  updatePassword: (id, password) => api.post(`/users/${id}/password`, { password }),
 };
 
 export default api;

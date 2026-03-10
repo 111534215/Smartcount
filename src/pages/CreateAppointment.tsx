@@ -121,7 +121,8 @@ const CreateAppointment = () => {
       });
     } catch (error) {
       console.error('預約失敗:', error);
-      message.error('預約失敗，請稍後再試');
+      const errorMsg = error.response?.data?.detail || '預約失敗，請稍後再試';
+      message.error(errorMsg);
     } finally {
       setLoading(false);
     }

@@ -100,7 +100,7 @@ const Lobby = () => {
         <Text type="secondary">歡迎來到校園，請選擇您的服務項目</Text>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl w-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 max-w-7xl w-full">
         {/* 訪客預約 - 開放給所有人 */}
         <Card 
           hoverable 
@@ -114,6 +114,22 @@ const Lobby = () => {
           <Text className="text-xs">預先填寫資料，快速生成 QR Code</Text>
           <div className="mt-6">
             <Button type="primary" block shape="round">立即預約</Button>
+          </div>
+        </Card>
+
+        {/* 查詢 QR Code - 開放給所有人 */}
+        <Card 
+          hoverable 
+          className="text-center border-none shadow-md"
+          onClick={() => navigate('/find-qrcode')}
+        >
+          <div className="flex justify-center mb-4 text-indigo-500">
+            <QrCode size={48} />
+          </div>
+          <Title level={4}>查詢 QR Code</Title>
+          <Text className="text-xs">忘記編號？輸入電話找回 QR Code</Text>
+          <div className="mt-6">
+            <Button type="default" block shape="round" className="border-indigo-500 text-indigo-600">找回憑證</Button>
           </div>
         </Card>
 

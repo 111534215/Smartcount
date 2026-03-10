@@ -8,6 +8,8 @@ import Records from './pages/Records';
 import GuardCheckin from './pages/GuardCheckin';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
+import FindMyQRCode from './pages/FindMyQRCode';
+import AdminSettings from './pages/AdminSettings';
 
 function App() {
   return (
@@ -18,9 +20,11 @@ function App() {
             <Route path="/" element={<Lobby />} />
             <Route path="/login" element={<Login />} />
             <Route path="/create-appointment" element={<CreateAppointment />} />
+            <Route path="/find-qrcode" element={<FindMyQRCode />} />
             <Route path="/guard" element={<GuardCheckin />} />
             <Route path="/records" element={<Records />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
           </Routes>
         </Router>
       </AntdApp>

@@ -26,7 +26,8 @@ import {
   History,
   TrendingUp,
   UserCheck,
-  ArrowLeft
+  ArrowLeft,
+  Settings
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { appointmentApi, userApi } from '../api/api';
@@ -185,13 +186,20 @@ const AdminDashboard = () => {
         <Menu
           mode="inline"
           selectedKeys={[activeKey]}
-          onClick={({ key }) => setActiveKey(key)}
+          onClick={({ key }) => {
+            if (key === '5') {
+              navigate('/admin/settings');
+            } else {
+              setActiveKey(key);
+            }
+          }}
           style={{ borderRight: 0 }}
           items={[
             { key: '1', icon: <LayoutDashboard size={18} />, label: '儀表板' },
             { key: '2', icon: <UserCog size={18} />, label: '使用者管理' },
             { key: '3', icon: <History size={18} />, label: '歷史紀錄' },
             { key: '4', icon: <TrendingUp size={18} />, label: '數據統計' },
+            { key: '5', icon: <Settings size={18} />, label: '系統帳號設定' },
           ]}
         />
         <div className="absolute bottom-6 left-0 right-0 px-4 flex flex-col gap-3">
