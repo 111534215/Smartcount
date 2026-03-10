@@ -1,0 +1,5 @@
+{
+  "name": "校園訪客櫃台管理系統",
+  "description": "提供訪客預約、警衛簽到、照片記錄與 QR Code 通行的校園安全管理系統。",
+  "requestFramePermissions": ["camera"]
+}
